@@ -10,25 +10,26 @@ using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
 
-namespace CopyEbene
+namespace CopyParameters
 {
     [Transaction(TransactionMode.Manual)]
     [Regeneration(RegenerationOption.Manual)]
 
-    public class sop_Wand_CopyEbene : IExternalCommand
+    public class sop_CopyParameters : IExternalCommand
     {
-
+        
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             //Get application and documetn objects
             UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
-            Application app = uiapp.Application;
+            Application app = uiapp.Application;          
+  
 
-            using (Transaction t = new Transaction(doc, "sop_Wand_CopyEbene"))
+            using (Transaction t = new Transaction(doc, "sop_CopyParameters"))
             {
-                t.Start("sop_Wand_CopyEbene");
+                t.Start("sop_Wand_CopyParameters");
                 try
                 {
 
@@ -36,64 +37,65 @@ namespace CopyEbene
 
                     Reference pickedref = null;
                     Selection sel = uiapp.ActiveUIDocument.Selection;
-                    WallPickFilter selFilter = new WallPickFilter();
-                    pickedref = sel.PickObject(ObjectType.Element, selFilter, "Please select a wall");
+                    pickedref = sel.PickObject(ObjectType.Element, "Please select an element");
                     Element elem = uidoc.Document.GetElement(pickedref);
+                    
+
+                    // pick target elements 
+
+                    IList<Reference> refSet = sel.PickObjects(ObjectType.Element, "Wählen Sie Elementen");
 
 
+                    //Get and Set Parameter
+                    string Dialogmessage = "";
 
-                    // Ask the user to pick target Walls 
+                    IList<Parameter> paramSet = elem.GetOrderedParameters();
 
-                    WallPickFilter wallPickFilter = new WallPickFilter();
-                    IList<Reference> walls = sel.PickObjects(ObjectType.Element, wallPickFilter, "Wählen Sie Wände die Sie anpassen wollen");
-                   
-
-                    //Get Parameters
-
-                    Parameter wallBaseOffset = elem.get_Parameter(BuiltInParameter.WALL_BASE_OFFSET);
-                    Parameter wallTopOffset = elem.get_Parameter(BuiltInParameter.WALL_TOP_OFFSET);
-                    Parameter wallLevelBaseOffset = elem.get_Parameter(BuiltInParameter.WALL_BASE_CONSTRAINT);
-                    Parameter wallLevelTopOffset = elem.get_Parameter(BuiltInParameter.WALL_HEIGHT_TYPE);
-                    Parameter wallManuellOffset = elem.get_Parameter(BuiltInParameter.WALL_USER_HEIGHT_PARAM);
-
-                 
-                  
-
-                    //Get Parameters by multiple Objects
-
-                    foreach (Reference w in walls)
+                    foreach (Parameter param in paramSet)
                     {
-                        //Get all elements in the list
+                        if (param.Definition.Name.Contains("sop_"))
+                        {                           
+                            
+                            string name = param.Definition.Name;
+                            string val = GetParameterValue(param);
+                            double DoubleVal = GetParameterDoubleValue(param);
+                            int id = param.Id.IntegerValue;
+                            //int Count = 0;
+                            try
+                            {
+                                foreach (Reference r in refSet)
+                                {
+                                    
+                                    Element elemSet = uidoc.Document.GetElement(r);
+                                    Parameter targetParam = elemSet.get_Parameter((BuiltInParameter)id);
+                                    string targetname = targetParam.Definition.Name;
+                                    string targetval = GetParameterValue(targetParam);                                   
+                                    
+                                    targetParam.Set(val);
+                                    targetParam.Set(DoubleVal);
+                                    
+                                    
 
-                        Element TarWall = uidoc.Document.GetElement(w);
+                                    //Count++;
+                                    //Dialogmessage += Count + ".Element - " + targetname + " = " + val + "\n";
+                                    
+                                }
+                                Dialogmessage += name+"\n";
 
-                        //Get parameters from the elements
-
-                        Parameter targetBaseOffset = TarWall.get_Parameter(BuiltInParameter.WALL_BASE_OFFSET);
-                        Parameter targetTopOffset = TarWall.get_Parameter(BuiltInParameter.WALL_TOP_OFFSET);
-                        Parameter targetLevelBaseOffset = TarWall.get_Parameter(BuiltInParameter.WALL_BASE_CONSTRAINT);
-                        Parameter targetLevelTopOffset = TarWall.get_Parameter(BuiltInParameter.WALL_HEIGHT_TYPE);
-                        Parameter targetManuellOffset = TarWall.get_Parameter(BuiltInParameter.WALL_USER_HEIGHT_PARAM);
-
-                        //Set parameters
-
-                        targetBaseOffset.SetValueString(GetParameterValue(wallBaseOffset));
-                        targetLevelBaseOffset.Set(wallLevelBaseOffset.AsElementId());
-                        targetLevelTopOffset.Set(wallLevelTopOffset.AsElementId());
-
-                        if (targetManuellOffset.UserModifiable == false)
-                        {
-                            targetManuellOffset.SetValueString(GetParameterValue(wallManuellOffset));
-
+                            }
+                            catch (Autodesk.Revit.Exceptions.OperationCanceledException)
+                            {
+                                continue;
+                            }
+                            catch(Exception ex)
+                            {
+                                continue;
+                            }
+                            
                         }
-                        else
-                        {
-
-                            targetTopOffset.SetValueString(GetParameterValue(wallTopOffset));
-                        }
-
+                        
                     }
-
+                    TaskDialog.Show("Neue Werte", Dialogmessage);
                 }
                 catch (Autodesk.Revit.Exceptions.OperationCanceledException)
                 {
@@ -105,16 +107,13 @@ namespace CopyEbene
                     return Result.Failed;
                 }
 
-                t.Commit();   
-
-
+                t.Commit();               
 
             }
 
             return Result.Succeeded;
 
-        }
-
+        }     
 
         //*****************GetParameterValue*************************
         public string GetParameterValue(Parameter parameter)
@@ -128,7 +127,7 @@ namespace CopyEbene
                     return parameter.AsElementId().IntegerValue.ToString();
                 case StorageType.Integer:
                     //get value with unit, AsInteger() can got value without unit
-                    return parameter.AsValueString();
+                    return parameter.AsValueString();                    
                 case StorageType.None:
                     return parameter.AsValueString();
                 case StorageType.String:
@@ -137,29 +136,25 @@ namespace CopyEbene
                     return "";
             }
         }
-
-        // **********************Selection Filter***************************
-        public class WallPickFilter : ISelectionFilter
+        public double GetParameterDoubleValue(Parameter parameter)
         {
-            public bool AllowElement(Element e)
+            switch (parameter.StorageType)
             {
-                return e.Category.Id.IntegerValue.Equals((int)BuiltInCategory.OST_Walls);
-            }
-            public bool AllowReference(Reference r, XYZ p)
-            {
-                return false;
-            }
-
-        }
-        public void PickObj(Document doc, IList<Reference> walls)
-        {
-            foreach (Reference w in walls)
-            {
-                Element wall = doc.GetElement(w);
-
+                case StorageType.Double:
+                    //get value with unit, AsDouble() can got vale without unit
+                    return parameter.AsDouble();
+                case StorageType.ElementId:
+                    return parameter.AsElementId().IntegerValue;
+                case StorageType.Integer:
+                    //get value with unit, AsInteger() can got value without unit
+                    return parameter.AsInteger();
+                case StorageType.None:
+                    return parameter.AsDouble();
+                case StorageType.String:
+                    return parameter.AsDouble();
+                default:
+                    return 0;
             }
         }
-
-
     }
 }
