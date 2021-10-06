@@ -1,0 +1,236 @@
+<Window x:Class="IsolateParameter.UserWindControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:IsolateParameter"
+             mc:Ignorable="d" 
+            Width="450"            
+            Height="200"
+        Title="Elemente isolieren nach Parameter-Name und -Value"
+        ResizeMode="NoResize" 
+        WindowStartupLocation="CenterScreen"
+            
+            >
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50*"/>
+            <RowDefinition Height="50*"/>
+            <RowDefinition Height="70"/>
+            <RowDefinition Height="1"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="130"/>
+            <ColumnDefinition Width="100*"/>
+        </Grid.ColumnDefinitions>
+
+
+        <TextBlock Grid.Row="0"
+                   Grid.Column="0"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Center"
+                   Width="120"
+                   Height="30"
+                   Margin="10,10,0,10"
+                   FontWeight="Bold" 
+                   FontSize="14" 
+                   FontFamily="Microsoft JhengHei"
+                   >Parameter Name
+
+        </TextBlock>
+
+        <TextBox  x:Name="ParameterName" 
+                  Grid.Row="0"
+                  Grid.Column="1"
+                  HorizontalAlignment="Right"
+                  VerticalAlignment="Center"
+                  Width="290"
+                  Height="30" Margin="0,10,10,10" ClipToBounds="True" BorderThickness="1,2"
+                  />
+
+        <TextBlock Grid.Row="1"
+                   Grid.Column="0"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Center"
+                   Width="120"
+                   Height="30" 
+                   Margin="10,10,0,10" 
+                   FontSize="14" 
+                   FontFamily="Microsoft JhengHei" 
+                   FontWeight="Bold"
+                   >Parameter Value
+
+        </TextBlock>
+
+        <TextBox  x:Name="ParameterValue" 
+                  Grid.Row="1"
+                  Grid.Column="1"
+                  HorizontalAlignment="Right"
+                  VerticalAlignment="Center"
+                  Width="290"
+                  Height="30" Margin="0,10,10,10" BorderThickness="1,2">
+
+        </TextBox>
+
+        <Button x:Name="ParameterIsolieren" 
+                Grid.Row="2"
+                Grid.Column="1"
+                Click="ElementenInViewIsolieren"
+                Content="Isolieren"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom" 
+                Height="50"  
+                Width="151" Margin="0,0,10,10"
+                />
+        <Image HorizontalAlignment="Center" 
+               Height="30" 
+               Grid.Row="2" 
+               Grid.Column="0"
+               VerticalAlignment="Center" 
+               Width="65" 
+               Source="sop_Icons.png" 
+               Margin="10,30,55,10"
+               Grid.RowSpan="1" 
+               StretchDirection="UpOnly" 
+               Stretch="Fill"/>
+        <Button x:Name="ParameterIsolierenWennLeer" 
+            Grid.Row="2"
+            Grid.Column="1"
+            Click="ElementenInViewIsolierenWennLeer"
+            Content="Iso. Wenn Value Leer"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom" 
+            Height="50"  
+            Width="134" 
+                Margin="0,0,166,10"
+                />
+        <CheckBox Content="Type Parameter"
+                  HorizontalAlignment="Left" 
+                  Margin="10,0,0,0" 
+                  Grid.Row="2"
+                  IsChecked="True"
+                  VerticalAlignment="Top" 
+                  x:Name="TypeParameterCheck"
+                  Background="White"/>
+
+
+    </Grid>
+</Window>
+<Window x:Class="IsolateParameter.UserWindControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:IsolateParameter"
+             mc:Ignorable="d" 
+            Width="450"            
+            Height="200"
+        Title="Elemente isolieren nach Parameter-Name und -Value"
+        ResizeMode="NoResize" 
+        WindowStartupLocation="CenterScreen"
+            
+            >
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50*"/>
+            <RowDefinition Height="50*"/>
+            <RowDefinition Height="70"/>
+            <RowDefinition Height="1"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="130"/>
+            <ColumnDefinition Width="100*"/>
+        </Grid.ColumnDefinitions>
+
+
+        <TextBlock Grid.Row="0"
+                   Grid.Column="0"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Center"
+                   Width="120"
+                   Height="30"
+                   Margin="10,10,0,10"
+                   FontWeight="Bold" 
+                   FontSize="14" 
+                   FontFamily="Microsoft JhengHei"
+                   >Parameter Name
+
+        </TextBlock>
+
+        <TextBox  x:Name="ParameterName" 
+                  Grid.Row="0"
+                  Grid.Column="1"
+                  HorizontalAlignment="Right"
+                  VerticalAlignment="Center"
+                  Width="290"
+                  Height="30" Margin="0,10,10,10" ClipToBounds="True" BorderThickness="1,2"
+                  />
+
+        <TextBlock Grid.Row="1"
+                   Grid.Column="0"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Center"
+                   Width="120"
+                   Height="30" 
+                   Margin="10,10,0,10" 
+                   FontSize="14" 
+                   FontFamily="Microsoft JhengHei" 
+                   FontWeight="Bold"
+                   >Parameter Value
+
+        </TextBlock>
+
+        <TextBox  x:Name="ParameterValue" 
+                  Grid.Row="1"
+                  Grid.Column="1"
+                  HorizontalAlignment="Right"
+                  VerticalAlignment="Center"
+                  Width="290"
+                  Height="30" Margin="0,10,10,10" BorderThickness="1,2">
+
+        </TextBox>
+
+        <Button x:Name="ParameterIsolieren" 
+                Grid.Row="2"
+                Grid.Column="1"
+                Click="ElementenInViewIsolieren"
+                Content="Isolieren"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom" 
+                Height="50"  
+                Width="151" Margin="0,0,10,10"
+                />
+        <Image HorizontalAlignment="Center" 
+               Height="30" 
+               Grid.Row="2" 
+               Grid.Column="0"
+               VerticalAlignment="Center" 
+               Width="65" 
+               Source="sop_Icons.png" 
+               Margin="10,30,55,10"
+               Grid.RowSpan="1" 
+               StretchDirection="UpOnly" 
+               Stretch="Fill"/>
+        <Button x:Name="ParameterIsolierenWennLeer" 
+            Grid.Row="2"
+            Grid.Column="1"
+            Click="ElementenInViewIsolierenWennLeer"
+            Content="Iso. Wenn Value Leer"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom" 
+            Height="50"  
+            Width="134" 
+                Margin="0,0,166,10"
+                />
+        <CheckBox Content="Type Parameter"
+                  HorizontalAlignment="Left" 
+                  Margin="10,0,0,0" 
+                  Grid.Row="2"
+                  IsChecked="True"
+                  VerticalAlignment="Top" 
+                  x:Name="TypeParameterCheck"
+                  Background="White"/>
+
+
+    </Grid>
+</Window>
