@@ -1,0 +1,76 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Reflection;
+using System.Threading.Tasks;
+using Autodesk.Revit.DB;
+using Autodesk.Revit.ApplicationServices;
+using Autodesk.Revit.Attributes;
+using Autodesk.Revit.UI;
+using Autodesk.Revit.UI.Selection;
+using System.Collections;
+
+namespace IsolateParameter
+{
+    [Transaction(TransactionMode.Manual)]
+    [Regeneration(RegenerationOption.Manual)]
+    public class sop_IsolateParameter : IExternalCommand
+    {
+        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
+        {
+            //Get application and documetn objects
+            UIApplication uiapp = commandData.Application;
+            UIDocument uidoc = uiapp.ActiveUIDocument;
+            Document doc = uidoc.Document;
+            Application app = uiapp.Application;
+
+
+            using (Transaction t = new Transaction(doc, "sop_IsolateParameter"))
+            {
+                t.Start("sop_IsolateParameter");
+                try
+                {
+
+                    View view = uidoc.ActiveView;
+
+                    // all elements in active view
+                    var collector = new FilteredElementCollector(doc, view.Id).WhereElementIsNotElementType();
+                    List<Element> elementsInView = new List<Element>();
+
+                    foreach (Element e in collector)
+                    {
+                        if (null != e.Category
+                          && e.Category.HasMaterialQuantities)
+                        {
+                            elementsInView.Add(e);
+                        }
+                    }
+
+                    //Create UserWindowControl 
+                    UserWindControl userWindControl = new UserWindControl(elementsInView, view, uidoc);
+                    userWindControl.Show();
+
+                }
+
+
+                catch (Autodesk.Revit.Exceptions.OperationCanceledException)
+                {
+                    return Result.Cancelled;
+                }
+                catch (Exception ex)
+                {
+                    message = ex.Message;
+                    return Result.Failed;
+                }
+
+
+                t.Commit();
+
+            }
+
+            return Result.Succeeded;
+
+        }
+    }
+}
