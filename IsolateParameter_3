@@ -1,0 +1,241 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
+
+namespace IsolateParameter
+{
+    /// <summary>
+    /// Interaktionslogik für UserWindControl.xaml
+    /// </summary>
+    public partial class UserWindControl : Window
+    {
+
+        List<ElementId> Ids = new List<ElementId>();
+        List<ElementId> TypeIds = new List<ElementId>();
+        List<Element> elements;
+        View view1;
+        Document doc;
+
+
+        public UserWindControl(IList<Element> elementsInView, View view, UIDocument uidoc)
+        {
+            InitializeComponent();
+            elements = (List<Element>)elementsInView;
+            view1 = view;
+            doc = uidoc.Document;
+        }
+
+        //Create Code for first Button
+        private void ElementenInViewIsolieren(Object sender, EventArgs e)
+        {
+            string ResultValue = ParameterValue.Text;
+            string ResultParameter = ParameterName.Text;
+            bool TypeParamCheck = TypeParameterCheck.IsChecked == true;
+
+
+            //find Elements with Type Parameter 
+            if (TypeParamCheck)
+            {
+
+
+                foreach (Element elem in elements)
+                {
+                    ElementId elemTypeId = elem.GetTypeId();
+                    ElementType elemType = doc.GetElement(elemTypeId) as ElementType;
+
+                    foreach (Parameter TypeParam in elemType.Parameters)
+                    {
+                        try
+                        {
+                            if (TypeParam.Definition.Name == ResultParameter)
+                            {
+                                string val = GetParameterValue(TypeParam);
+
+                                if (val.Contains(ResultValue) & TypeParam.HasValue == true)
+                                {
+                                    ElementId Typeid = elem.Id;
+                                    TypeIds.Add(Typeid);
+                                }                                
+                            }
+                        }
+
+                        catch (Autodesk.Revit.Exceptions.OperationCanceledException)
+                        {
+                            continue;
+                        }
+                        catch (Exception ex)
+                        {
+                            continue;
+                        }
+                    }
+                }
+                if (TypeIds.Any())
+                {
+                    view1.IsolateElementsTemporary(TypeIds);
+                    TypeIds.Clear();
+                }
+            }
+            //find Elements with exemplar Parameter 
+            else
+            {
+                foreach (Element elem in elements)
+                {
+                    IList<Parameter> paramSet = elem.GetOrderedParameters();
+
+                    foreach (Parameter param in paramSet)
+                    {
+                        try
+                        {
+                            if (param.Definition.Name == ResultParameter)
+                            {
+                                string val = GetParameterValue(param);
+                                if (val.Contains(ResultValue) & param.HasValue == true)
+                                {
+                                    ElementId id = elem.Id;
+                                    Ids.Add(id);
+                                }                                
+                            }
+                        }
+                        catch (Autodesk.Revit.Exceptions.OperationCanceledException)
+                        {
+                            continue;
+                        }
+                        catch (Exception ex)
+                        {
+                            continue;
+                        }
+                    }
+                }
+                if (Ids.Any())
+                {
+                    view1.IsolateElementsTemporary(Ids);
+                    Ids.Clear();
+                }                   
+            }
+        }
+
+        //Create Code for second Button
+
+        private void ElementenInViewIsolierenWennLeer(Object sender, EventArgs e)
+        {
+            string ResultParameter = ParameterName.Text;
+            bool TypeParamCheck = TypeParameterCheck.IsChecked == true;
+
+            //find Elements with Type Parameter 
+            if (TypeParamCheck)
+            {
+                foreach (Element elem in elements)
+                {
+                    ElementId elemTypeId = elem.GetTypeId();
+                    ElementType elemType = doc.GetElement(elemTypeId) as ElementType;
+
+                    foreach (Parameter TypeParam in elemType.Parameters)
+                    {
+                        try
+                        {
+                            if (TypeParam.Definition.Name == ResultParameter)
+                            {
+                                string val = GetParameterValue(TypeParam);
+
+                                if (TypeParam.HasValue != true)
+                                {
+                                    ElementId Typeid = elem.Id;
+                                    TypeIds.Add(Typeid);
+                                }
+                            }
+                        }
+
+                        catch (Autodesk.Revit.Exceptions.OperationCanceledException)
+                        {
+                            continue;
+                        }
+                        catch (Exception ex)
+                        {
+                            continue;
+                        }
+                    }
+                }
+                if (TypeIds.Any())
+                {
+                    view1.IsolateElementsTemporary(TypeIds);
+                    TypeIds.Clear();
+                }
+            }
+            //find Elements with exemplar Parameter 
+            else
+            {
+                foreach (Element elem in elements)
+                {
+                    IList<Parameter> paramSet = elem.GetOrderedParameters();
+
+                    foreach (Parameter param in paramSet)
+                    {
+                        try
+                        {
+                            if (param.Definition.Name == ResultParameter)
+                            {
+                                string val = GetParameterValue(param);
+
+                                if (param.HasValue != true)
+                                {
+                                    ElementId id = elem.Id;
+                                    Ids.Add(id);
+                                }
+                            }
+                        }
+                        catch (Autodesk.Revit.Exceptions.OperationCanceledException)
+                        {
+                            continue;
+                        }
+                        catch (Exception ex)
+                        {
+                            continue;
+                        }
+                    }
+                }
+                if (Ids.Any())
+                {
+                    view1.IsolateElementsTemporary(Ids);
+                    Ids.Clear();
+                }
+            }
+        }
+               
+        public string GetParameterValue(Parameter parameter)
+        {
+            switch (parameter.StorageType)
+            {
+                case StorageType.Double:
+                    //get value with unit, AsDouble() can got vale without unit
+                    return parameter.AsValueString();
+                case StorageType.ElementId:
+                    return parameter.AsElementId().IntegerValue.ToString();
+                case StorageType.Integer:
+                    //get value with unit, AsInteger() can got value without unit
+                    return parameter.AsValueString();
+                case StorageType.None:
+                    return parameter.AsValueString();
+                case StorageType.String:
+                    return parameter.AsString();
+                default:
+                    return "";
+            }
+        }
+
+    }
+
+}
+
